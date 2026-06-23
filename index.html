@@ -3,7 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BP Motor Control</title>
+    <title>BP Motor Panel</title>
+    
+    <!-- ============================================ -->
+    <!-- === YOUR FIREBASE v12.15.0 CDN === -->
+    <!-- ============================================ -->
+    <script type="module">
+        // Import the functions you need from the SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdU0803CwzkKBIC9VTFBT6X29xhOeUi3g",
+            authDomain: "bp-motor-panel.firebaseapp.com",
+            databaseURL: "https://bp-motor-panel-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "bp-motor-panel",
+            storageBucket: "bp-motor-panel.firebasestorage.app",
+            messagingSenderId: "186220670912",
+            appId: "1:186220670912:web:212992e82056da7a31e225"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        
+        // Make available globally
+        window.auth = auth;
+        window.db = db;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.signOut = signOut;
+        window.ref = ref;
+        window.set = set;
+        window.onValue = onValue;
+        
+        console.log('✅ Firebase v12 Ready');
+        console.log('Project:', firebaseConfig.projectId);
+        
+        // Dispatch event when Firebase is ready
+        window.dispatchEvent(new Event('firebase-ready'));
+    </script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -16,123 +58,451 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            color: white;
         }
         
+        /* Login Page */
         .login-box {
             background: #16213e;
             padding: 40px 30px;
             border-radius: 20px;
             text-align: center;
-            max-width: 380px;
-            width: 100%;
+            width: 380px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            color: white;
         }
         
         .login-box h2 {
+            font-size: 24px;
             margin-bottom: 5px;
-            font-size: 22px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
-        .login-box p {
-            color: #999;
+        .login-box .subtitle {
+            color: #888;
             font-size: 13px;
             margin-bottom: 25px;
         }
         
         .login-box input {
             width: 100%;
-            padding: 12px;
+            padding: 12px 15px;
             margin: 8px 0;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.08);
             border: 1px solid #333;
-            border-radius: 8px;
+            border-radius: 10px;
             color: white;
             font-size: 15px;
+            display: block;
         }
         
         .login-box input:focus {
             outline: none;
             border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102,126,234,0.3);
         }
         
         .login-box button {
             width: 100%;
             padding: 14px;
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             color: white;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             margin-top: 15px;
+            letter-spacing: 1px;
         }
         
         .login-box button:hover {
-            background: #5a6fd6;
+            box-shadow: 0 8px 30px rgba(102,126,234,0.4);
+            transform: translateY(-2px);
         }
         
         .login-box button:disabled {
-            background: #444;
+            opacity: 0.6;
             cursor: not-allowed;
         }
         
         .error-msg {
             color: #f44336;
-            background: rgba(244,67,54,0.1);
-            padding: 10px;
-            border-radius: 8px;
             margin-top: 12px;
             font-size: 14px;
             display: none;
+            padding: 10px;
+            background: rgba(244,67,54,0.1);
+            border-radius: 8px;
         }
         
-        .error-msg.show {
-            display: block;
+        .error-msg.show { display: block; }
+        
+        /* Dashboard */
+        .dashboard {
+            background: #16213e;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            color: white;
+            display: none;
         }
         
-        .success-msg {
+        .dashboard h2 {
+            font-size: 22px;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .dashboard .user-info {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .motor-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: bold;
+            border: 4px solid #f44336;
+            color: #f44336;
+            background: rgba(244,67,54,0.1);
+            transition: all 0.3s;
+        }
+        
+        .motor-circle.running {
+            border-color: #4CAF50;
             color: #4CAF50;
-            margin-top: 12px;
-            font-size: 14px;
+            background: rgba(76,175,80,0.1);
+            box-shadow: 0 0 30px rgba(76,175,80,0.3);
         }
         
-        .info-text {
-            color: #666;
-            font-size: 11px;
-            margin-top: 20px;
+        .btn-row {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .btn:active { transform: scale(0.95); }
+        
+        .btn-start {
+            background: #4CAF50;
+            box-shadow: 0 5px 20px rgba(76,175,80,0.3);
+        }
+        
+        .btn-start:disabled {
+            background: #2a3a2a;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+        
+        .btn-stop {
+            background: #f44336;
+            box-shadow: 0 5px 20px rgba(244,67,54,0.3);
+        }
+        
+        .btn-logout {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 15px;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(244,67,54,0.2);
+            border-color: #f44336;
+            color: #f44336;
+        }
+        
+        .status-row {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .status-card {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        .status-card .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        
+        .dot.green { background: #4CAF50; box-shadow: 0 0 8px rgba(76,175,80,0.5); }
+        .dot.red { background: #f44336; box-shadow: 0 0 8px rgba(244,67,54,0.5); }
+        
+        .status-card .label { color: #888; }
+        .status-card .value { color: white; font-weight: bold; }
+        
+        .footer-text {
+            color: #555;
+            font-size: 10px;
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
 
-    <div class="login-box">
-        <h2>🔐 FH Motor Control</h2>
-        <p>Sign in to access control panel</p>
+    <!-- ========== LOGIN PAGE ========== -->
+    <div id="loginPage" class="login-box">
+        <h2>BP Motor Panel</h2>
+        <p class="subtitle">Sign in to access control panel</p>
         
-        <input type="email" id="email" placeholder="Email address" autocomplete="email">
-        <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+        <input type="email" id="emailInput" placeholder="Email address" autocomplete="email">
+        <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
         
-        <button id="loginBtn">Sign In</button>
-        
-        <div class="error-msg" id="errorMsg"></div>
-        <div class="success-msg" id="successMsg"></div>
-        
-        <p class="info-text">Authorized access only</p>
+        <button id="loginBtn" onclick="doLogin()">🔓 Sign In</button>
+        <div class="error-msg" id="loginError"></div>
     </div>
 
-    <!-- ES Module Script to manage modern Firebase operations securely -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"; // Standard Realtime DB hook if needed
+    <!-- ========== DASHBOARD PAGE ========== -->
+    <div id="dashboardPage" class="dashboard">
+        <h2>BP Motor Panel</h2>
+        <div class="user-info" id="userInfo">Welcome</div>
+        
+        <div class="motor-circle" id="motorCircle">OFF</div>
+        
+        <div class="btn-row">
+            <button class="btn btn-start" id="startBtn" onclick="startMotor()">▶ START</button>
+            <button class="btn btn-stop" onclick="stopMotor()">⏹ STOP</button>
+        </div>
+        
+        <div class="status-row">
+            <div class="status-card">
+                <span class="dot red" id="wifiDot"></span>
+                <span class="label">WiFi:</span>
+                <span class="value" id="wifiStatus">--</span>
+            </div>
+            <div class="status-card">
+                <span class="dot red" id="loraDot"></span>
+                <span class="label">LoRa:</span>
+                <span class="value" id="loraStatus">--</span>
+            </div>
+        </div>
+        
+        <button class="btn-logout" onclick="doLogout()">🚪 Sign Out</button>
+        <div class="footer-text">BP Motor Panel v1.0</div>
+    </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAdU0803CwzkKBIC9VTFBT6X29xhOeUi3g",
-            authDomain: "bp-motor-panel.firebaseapp.com",
-            databaseURL: "https://bp-motor-panel-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "bp-motor-panel",
-            storageBucket: "bp-motor-panel.firebasestorage.app",
-            messagingNo response
-
+    <!-- ========== MAIN APP CODE ========== -->
+    <script>
+        // Wait for Firebase to be ready
+        window.addEventListener('firebase-ready', function() {
+            console.log('🚀 App starting...');
+            
+            const auth = window.auth;
+            const db = window.db;
+            const signInWithEmailAndPassword = window.signInWithEmailAndPassword;
+            const onAuthStateChanged = window.onAuthStateChanged;
+            const signOut = window.signOut;
+            const ref = window.ref;
+            const set = window.set;
+            const onValue = window.onValue;
+            
+            // ============================================
+            // === AUTH STATE OBSERVER ===
+            // ============================================
+            onAuthStateChanged(auth, function(user) {
+                console.log('Auth state:', user ? user.email : 'No user');
+                
+                if (user) {
+                    // LOGGED IN
+                    document.getElementById('loginPage').style.display = 'none';
+                    document.getElementById('dashboardPage').style.display = 'block';
+                    document.getElementById('userInfo').textContent = '👤 ' + user.email;
+                    setupListeners();
+                } else {
+                    // LOGGED OUT
+                    document.getElementById('loginPage').style.display = 'block';
+                    document.getElementById('dashboardPage').style.display = 'none';
+                    document.getElementById('emailInput').value = '';
+                    document.getElementById('passwordInput').value = '';
+                }
+            });
+            
+            // ============================================
+            // === LOGIN ===
+            // ============================================
+            window.doLogin = function() {
+                const email = document.getElementById('emailInput').value.trim();
+                const password = document.getElementById('passwordInput').value;
+                const errorDiv = document.getElementById('loginError');
+                const loginBtn = document.getElementById('loginBtn');
+                
+                errorDiv.classList.remove('show');
+                errorDiv.textContent = '';
+                
+                if (!email || !password) {
+                    errorDiv.textContent = '⚠️ Enter email and password';
+                    errorDiv.classList.add('show');
+                    return;
+                }
+                
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Signing in...';
+                
+                signInWithEmailAndPassword(auth, email, password)
+                    .then(function(result) {
+                        console.log('✅ Login OK:', result.user.email);
+                    })
+                    .catch(function(error) {
+                        console.error('❌ Login failed:', error.code);
+                        errorDiv.textContent = '❌ ' + error.message;
+                        errorDiv.classList.add('show');
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = '🔓 Sign In';
+                    });
+            };
+            
+            // ============================================
+            // === LOGOUT ===
+            // ============================================
+            window.doLogout = function() {
+                signOut(auth).then(function() {
+                    console.log('Logged out');
+                });
+            };
+            
+            // ============================================
+            // === MOTOR CONTROL ===
+            // ============================================
+            let cmdId = 0;
+            
+            window.startMotor = function() {
+                cmdId++;
+                set(ref(db, 'motor_control'), {
+                    command: 'on',
+                    command_id: cmdId,
+                    timestamp: Date.now(),
+                    source: 'web_dashboard'
+                });
+                console.log('▶ START sent');
+            };
+            
+            window.stopMotor = function() {
+                cmdId++;
+                set(ref(db, 'motor_control'), {
+                    command: 'off',
+                    command_id: cmdId,
+                    timestamp: Date.now(),
+                    source: 'web_dashboard'
+                });
+                console.log('⏹ STOP sent');
+            };
+            
+            // ============================================
+            // === FIREBASE LISTENERS ===
+            // ============================================
+            function setupListeners() {
+                // Motor Status
+                onValue(ref(db, 'motor_status'), function(snap) {
+                    const data = snap.val();
+                    if (data) {
+                        const circle = document.getElementById('motorCircle');
+                        const startBtn = document.getElementById('startBtn');
+                        
+                        if (data.running) {
+                            circle.textContent = 'ON';
+                            circle.className = 'motor-circle running';
+                            startBtn.disabled = true;
+                        } else {
+                            circle.textContent = 'OFF';
+                            circle.className = 'motor-circle';
+                            startBtn.disabled = false;
+                        }
+                    }
+                });
+                
+                // System Status
+                onValue(ref(db, 'system_status'), function(snap) {
+                    const data = snap.val();
+                    if (data) {
+                        updateWifiStatus(data.wifi_connected);
+                    }
+                });
+                
+                // LoRa Health
+                onValue(ref(db, 'lora_health'), function(snap) {
+                    const data = snap.val();
+                    if (data) {
+                        updateLoraStatus(data.connected);
+                    }
+                });
+            }
+            
+            function updateWifiStatus(connected) {
+                const dot = document.getElementById('wifiDot');
+                const status = document.getElementById('wifiStatus');
+                if (connected) {
+                    dot.className = 'dot green';
+                    status.textContent = 'Online';
+                } else {
+                    dot.className = 'dot red';
+                    status.textContent = 'Offline';
+                }
+            }
+            
+            function updateLoraStatus(connected) {
+                const dot = document.getElementById('loraDot');
+                const status = document.getElementById('loraStatus');
+                if (connected) {
+                    dot.className = 'dot green';
+                    status.textContent = 'Online';
+                } else {
+                    dot.className = 'dot red';
+                    status.textContent = 'Offline';
+                }
+            }
+            
+            // Enter key for login
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const loginPage = document.getElementById('loginPage');
+                    if (loginPage.style.display !== 'none') {
+                        doLogin();
+                    }
+                }
+            });
+            
+            console.log('✅ App fully ready');
+        });
+    </script>
+</body>
+</html>
