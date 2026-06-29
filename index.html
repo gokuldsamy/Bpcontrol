@@ -62,7 +62,6 @@
         .card { background: #16213e; padding: 12px 10px; border-radius: 14px; width: 100%; }
         .user-info { color: #888; font-size: 10px; margin-bottom: 4px; text-align: center; }
         
-        /* Status Banner */
         .alive-banner { padding: 6px 10px; border-radius: 6px; margin-bottom: 6px; text-align: center; font-size: 10px; font-weight: 600; display: none; }
         .alive-banner.show { display: block; }
         .alive-banner.off { background: rgba(244,67,54,0.2); color: #f44336; border: 1px solid rgba(244,67,54,0.4); }
@@ -81,6 +80,18 @@
         .motor-box .motor-relay { font-size: 8px; margin-top: 4px; padding: 2px 8px; border-radius: 10px; display: inline-block; font-weight: 700; }
         .motor-box.running .motor-relay { background: rgba(76,175,80,0.25); color: #66bb6a; }
         .motor-box:not(.running) .motor-relay { background: rgba(244,67,54,0.25); color: #ef5350; }
+        
+        /* Timer Display below relay */
+        .timer-preview {
+            font-size: 10px; color: #ffd54f; margin-top: 4px; font-weight: 700;
+            display: none; letter-spacing: 1px;
+        }
+        .timer-preview.show { display: block; }
+        .timer-countdown-running {
+            font-size: 16px; color: #ffd54f; margin-top: 4px; font-weight: 700;
+            display: none; letter-spacing: 2px;
+        }
+        .timer-countdown-running.show { display: block; }
         
         .btn-row { display: flex; gap: 10px; justify-content: center; margin: 8px 0; }
         .btn { flex: 1; max-width: 140px; padding: 12px 16px; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; color: white; }
@@ -107,10 +118,6 @@
         .timer-group input:focus { border-color: #667eea; outline: none; }
         .btn-timer { width: 100%; padding: 8px; background: linear-gradient(135deg, #667eea, #764ba2); border: none; border-radius: 6px; color: white; font-size: 11px; font-weight: 700; cursor: pointer; letter-spacing: 1px; }
         .btn-timer-clear { width: 100%; padding: 6px; background: transparent; border: 1px solid #f44336; border-radius: 6px; color: #f44336; font-size: 10px; cursor: pointer; margin-top: 4px; }
-        .timer-display { margin-top: 6px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 6px; display: none; }
-        .timer-display.active { display: block; }
-        .timer-countdown { font-size: 22px; font-weight: 700; color: #ffd54f; letter-spacing: 1px; }
-        .timer-label { font-size: 8px; color: #888; text-transform: uppercase; }
         
         .stats-row { display: flex; gap: 5px; margin: 6px 0; }
         .stat-card { flex: 1; background: #0f3460; padding: 8px 5px; border-radius: 8px; text-align: center; }
@@ -174,8 +181,6 @@
         </div>
         <div class="card">
             <div class="user-info" id="userInfo">Welcome</div>
-            
-            <!-- STATUS BANNER -->
             <div class="alive-banner" id="aliveBanner"></div>
             
             <div class="motor-box" id="motorBox">
@@ -183,11 +188,17 @@
                 <div class="motor-state" id="motorState">STOPPED</div>
                 <div class="motor-info" id="motorSource"></div>
                 <div class="motor-relay" id="motorRelay">Relay 2 (NC)</div>
+                <!-- Timer preview (shown after setting timer) -->
+                <div class="timer-preview" id="timerPreview"></div>
+                <!-- Timer countdown (shown after START + relay active) -->
+                <div class="timer-countdown-running" id="timerCountdownRunning"></div>
             </div>
+            
             <div class="btn-row">
                 <button class="btn btn-start" id="startBtn" onclick="startMotor()">START</button>
                 <button class="btn btn-stop" onclick="stopMotor()">STOP</button>
             </div>
+            
             <div class="status-row">
                 <div class="status-card"><span class="dot gray" id="masterDot"></span><span class="label">Master</span><span class="value" id="masterStatus">--</span></div>
                 <div class="status-card"><span class="dot gray" id="loraDot"></span><span class="label">LoRa</span><span class="value" id="loraStatus">--</span></div>
@@ -195,17 +206,13 @@
             </div>
             
             <div class="timer-section">
-                <div class="timer-title">Timer</div>
+                <div class="timer-title">Set Timer (optional)</div>
                 <div class="timer-inputs">
                     <div class="timer-group"><label>Hours</label><input type="number" id="hrs" placeholder="0" min="0" max="23" value="0"></div>
                     <div class="timer-group"><label>Minutes</label><input type="number" id="mins" placeholder="0" min="0" max="59" value="0"></div>
                 </div>
-                <button class="btn-timer" onclick="setTimer()">Set Timer</button>
-                <button class="btn-timer-clear" onclick="clearTimer()">Clear Timer</button>
-                <div class="timer-display" id="timerDisplay">
-                    <div class="timer-countdown" id="timerCountdown">00:00:00</div>
-                    <div class="timer-label">Remaining</div>
-                </div>
+                <button class="btn-timer" onclick="setTimerValue()">Confirm Timer</button>
+                <button class="btn-timer-clear" onclick="clearTimerValue()">Clear Timer</button>
             </div>
             
             <div class="stats-row">
@@ -244,7 +251,8 @@
 
     <script>
         let motorRunning = false, motorHistory = [], timerInterval = null;
-        const OFFLINE_TIMEOUT = 30; // 30 seconds without update = offline
+        let pendingTimerMinutes = 0, timerActive = false;
+        const OFFLINE_TIMEOUT = 30;
         
         function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         function clearLogs(path) { window.set(window.ref(window.db, path), null); }
@@ -265,30 +273,86 @@
             window.doLogout = function() { window.signOut(auth); showPage('loginPage'); };
             
             let cmdId = 0;
-            window.startMotor = function() { cmdId++; window.set(window.ref(db, 'motor_control'), {command:'on',command_id:cmdId,timestamp:Date.now(),source:'web_dashboard'}); showToast('Starting...'); };
-            window.stopMotor = function() { cmdId++; window.set(window.ref(db, 'motor_control'), {command:'off',command_id:cmdId,timestamp:Date.now(),source:'web_dashboard'}); showToast('Stopping...'); };
-            window.setTimer = function() {
-                const h=parseInt(document.getElementById('hrs').value)||0, m=parseInt(document.getElementById('mins').value)||0;
-                const total=h*60+m; if(total<=0){showToast('Set hours or minutes');return;} if(total>1440){showToast('Max 24 hours');return;}
-                cmdId++; window.set(window.ref(db, 'motor_control'), {command:'timer',command_id:cmdId,timestamp:Date.now(),source:'web_dashboard',minutes:total});
-                showToast('Timer: '+h+'h '+m+'m'); document.getElementById('hrs').value=0; document.getElementById('mins').value=0;
+            
+            // Set timer value (does NOT start motor)
+            window.setTimerValue = function() {
+                const h = parseInt(document.getElementById('hrs').value) || 0;
+                const m = parseInt(document.getElementById('mins').value) || 0;
+                const total = h * 60 + m;
+                if (total <= 0) { showToast('Set hours or minutes'); return; }
+                if (total > 1440) { showToast('Max 24 hours'); return; }
+                
+                pendingTimerMinutes = total;
+                document.getElementById('timerPreview').textContent = 'Timer: ' + h + 'h ' + m + 'm';
+                document.getElementById('timerPreview').classList.add('show');
+                document.getElementById('hrs').value = 0;
+                document.getElementById('mins').value = 0;
+                showToast('Timer set: ' + h + 'h ' + m + 'm - Press START to begin');
             };
-            window.clearTimer = function() {
-                cmdId++; window.set(window.ref(db, 'motor_control'), {command:'off',command_id:cmdId,timestamp:Date.now(),source:'web_dashboard'});
-                document.getElementById('timerDisplay').classList.remove('active'); if(timerInterval){clearInterval(timerInterval);timerInterval=null;} showToast('Timer cancelled');
+            
+            // Clear timer value
+            window.clearTimerValue = function() {
+                pendingTimerMinutes = 0;
+                timerActive = false;
+                document.getElementById('timerPreview').classList.remove('show');
+                document.getElementById('timerCountdownRunning').classList.remove('show');
+                document.getElementById('hrs').value = 0;
+                document.getElementById('mins').value = 0;
+                if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                showToast('Timer cleared');
+            };
+            
+            // START button - sends ON or ON+timer
+            window.startMotor = function() {
+                cmdId++;
+                if (pendingTimerMinutes > 0) {
+                    // Send timer command
+                    window.set(window.ref(db, 'motor_control'), {
+                        command: 'timer',
+                        command_id: cmdId,
+                        timestamp: Date.now(),
+                        source: 'web_dashboard',
+                        minutes: pendingTimerMinutes
+                    });
+                    timerActive = true;
+                    showToast('Starting with timer...');
+                } else {
+                    // Normal start
+                    window.set(window.ref(db, 'motor_control'), {
+                        command: 'on',
+                        command_id: cmdId,
+                        timestamp: Date.now(),
+                        source: 'web_dashboard'
+                    });
+                    showToast('Starting...');
+                }
+            };
+            
+            // STOP button
+            window.stopMotor = function() {
+                cmdId++;
+                pendingTimerMinutes = 0;
+                timerActive = false;
+                document.getElementById('timerPreview').classList.remove('show');
+                document.getElementById('timerCountdownRunning').classList.remove('show');
+                if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                window.set(window.ref(db, 'motor_control'), {
+                    command: 'off',
+                    command_id: cmdId,
+                    timestamp: Date.now(),
+                    source: 'web_dashboard'
+                });
+                showToast('Stopping...');
             };
             
             function setupListeners() {
                 window.onValue(window.ref(db, 'system_status'), function(snap) {
-                    const d=snap.val();
-                    if(d){
-                        // CHECK TIME since last update
+                    const d = snap.val();
+                    if (d) {
                         const now = Date.now();
                         const lastUpdate = d.last_update || 0;
                         const secondsSinceUpdate = (now - lastUpdate) / 1000;
                         const isMasterAlive = secondsSinceUpdate < OFFLINE_TIMEOUT;
-                        
-                        // Master is alive ONLY if updated recently
                         const masterOnline = d.wifi_connected && isMasterAlive;
                         const loraConnected = d.slave_online && isMasterAlive;
                         const slaveOnline = masterOnline && loraConnected;
@@ -299,49 +363,97 @@
                         updateMotorBox(d.motor_running, d.trigger_source);
                         updateBanner(masterOnline, loraConnected, slaveOnline, secondsSinceUpdate);
                         
-                        document.getElementById('statPings').textContent=(d.lora_ping_count||0).toLocaleString();
-                        document.getElementById('statMissed').textContent=d.lora_missed||0;
-                        if(d.timer_active){updateTimerDisplay(true,d.timer_seconds);}
+                        document.getElementById('statPings').textContent = (d.lora_ping_count || 0).toLocaleString();
+                        document.getElementById('statMissed').textContent = d.lora_missed || 0;
+                        
+                        // Show countdown when timer is active and motor is running
+                        if (d.timer_active && d.motor_running && d.timer_seconds > 0) {
+                            updateTimerCountdown(true, d.timer_seconds);
+                        }
                         
                         document.getElementById('footerText').textContent = 'Last update: ' + formatSecondsAgo(secondsSinceUpdate);
                     } else {
-                        // No data at all
                         updateMasterCard(false); updateLoraCard(false); updateSlaveCard(false);
                         updateBanner(false, false, false, 999);
                     }
                 });
-                window.onValue(window.ref(db, 'slave_details'), function(snap) {
-                    const d=snap.val();
-                    if(d){document.getElementById('statRestarts').textContent=d.restart_count||0;document.getElementById('statUptime').textContent=formatUptime(d.uptime||0);}
-                });
+                
                 window.onValue(window.ref(db, 'timer'), function(snap) {
-                    const d=snap.val();
-                    if(d&&d.active){updateTimerDisplay(true,d.remaining_seconds);}else{updateTimerDisplay(false,0);}
+                    const d = snap.val();
+                    if (d && d.active && d.remaining_seconds > 0 && motorRunning) {
+                        updateTimerCountdown(true, d.remaining_seconds);
+                    } else if (!d || !d.active) {
+                        updateTimerCountdown(false, 0);
+                        pendingTimerMinutes = 0;
+                        document.getElementById('timerPreview').classList.remove('show');
+                    }
                 });
+                
+                window.onValue(window.ref(db, 'slave_details'), function(snap) {
+                    const d = snap.val();
+                    if (d) {
+                        document.getElementById('statRestarts').textContent = d.restart_count || 0;
+                        document.getElementById('statUptime').textContent = formatUptime(d.uptime || 0);
+                    }
+                });
+            }
+            
+            // Show HH:MM:SS countdown in motor box
+            function updateTimerCountdown(active, secs) {
+                const el = document.getElementById('timerCountdownRunning');
+                const preview = document.getElementById('timerPreview');
+                
+                if (active && secs > 0) {
+                    el.textContent = formatCountdown(secs);
+                    el.classList.add('show');
+                    preview.classList.remove('show');
+                    
+                    if (timerInterval) clearInterval(timerInterval);
+                    let remaining = secs;
+                    timerInterval = setInterval(() => {
+                        remaining--;
+                        if (remaining <= 0) {
+                            clearInterval(timerInterval);
+                            el.classList.remove('show');
+                            pendingTimerMinutes = 0;
+                            timerActive = false;
+                        } else {
+                            el.textContent = formatCountdown(remaining);
+                        }
+                    }, 1000);
+                } else {
+                    el.classList.remove('show');
+                    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+                }
+            }
+            
+            function formatCountdown(s) {
+                const h = Math.floor(s / 3600);
+                const m = Math.floor((s % 3600) / 60);
+                const sec = s % 60;
+                return h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
             }
             
             function updateBanner(masterOk, loraOk, slaveOk, secondsAgo) {
                 const b = document.getElementById('aliveBanner');
-                if (!masterOk && !slaveOk) { b.textContent = 'Devices Offline - Last seen: ' + formatSecondsAgo(secondsAgo); b.className = 'alive-banner off show'; }
-                else if (masterOk && !loraOk) { b.textContent = 'Master Online - LoRa Disconnected'; b.className = 'alive-banner warn show'; }
+                if (!masterOk && !slaveOk) { b.textContent = 'Devices Offline - ' + formatSecondsAgo(secondsAgo); b.className = 'alive-banner off show'; }
+                else if (masterOk && !loraOk) { b.textContent = 'Master Online - LoRa Off'; b.className = 'alive-banner warn show'; }
                 else if (masterOk && loraOk && slaveOk) { b.textContent = 'All Systems Online'; b.className = 'alive-banner ok show'; }
                 else { b.className = 'alive-banner'; }
             }
             
-            function formatSecondsAgo(s) { if(s<5)return 'Just now'; if(s<60)return Math.floor(s)+'s ago'; if(s<3600)return Math.floor(s/60)+'m ago'; return Math.floor(s/3600)+'h ago'; }
+            function formatSecondsAgo(s) { if(s<5)return'Just now'; if(s<60)return Math.floor(s)+'s ago'; if(s<3600)return Math.floor(s/60)+'m ago'; return Math.floor(s/3600)+'h ago'; }
+            function formatUptime(s) { if(s<60)return s+'s'; if(s<3600)return Math.floor(s/60)+'m'; return Math.floor(s/3600)+'h'; }
             
-            function updateTimerDisplay(active,secs){
-                const display=document.getElementById('timerDisplay'),countdown=document.getElementById('timerCountdown');
-                if(active&&secs>0){display.classList.add('active');countdown.textContent=formatCountdown(secs);if(timerInterval)clearInterval(timerInterval);let r=secs;timerInterval=setInterval(()=>{r--;if(r<=0){clearInterval(timerInterval);display.classList.remove('active');}else{countdown.textContent=formatCountdown(r);}},1000);}
-                else{display.classList.remove('active');if(timerInterval){clearInterval(timerInterval);timerInterval=null;}}
+            function updateMasterCard(online) { document.getElementById('masterDot').className='dot '+(online?'green':'red'); document.getElementById('masterStatus').textContent=online?'Online':'Offline'; }
+            function updateLoraCard(connected) { document.getElementById('loraDot').className='dot '+(connected?'green':'red'); document.getElementById('loraStatus').textContent=connected?'Connected':'Off'; }
+            function updateSlaveCard(online) { document.getElementById('slaveDot').className='dot '+(online?'green':'red'); document.getElementById('slaveStatus').textContent=online?'Online':'Offline'; }
+            function updateMotorBox(running, source) {
+                const box = document.getElementById('motorBox'), btn = document.getElementById('startBtn');
+                motorRunning = running;
+                if (running) { box.className='motor-box running'; document.getElementById('motorIcon').textContent='RUNNING'; document.getElementById('motorState').textContent='ON'; document.getElementById('motorSource').textContent='By: '+getSrc(source); document.getElementById('motorRelay').textContent='Relay 1 (NO)'; if(btn)btn.disabled=true; }
+                else { box.className='motor-box'; document.getElementById('motorIcon').textContent='MOTOR'; document.getElementById('motorState').textContent='STOPPED'; document.getElementById('motorSource').textContent=source?'By: '+getSrc(source):''; document.getElementById('motorRelay').textContent='Relay 2 (NC)'; if(btn)btn.disabled=false; }
             }
-            function formatCountdown(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return h.toString().padStart(2,'0')+':'+m.toString().padStart(2,'0')+':'+sec.toString().padStart(2,'0');}
-            function formatUptime(s){if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m';return Math.floor(s/3600)+'h';}
-            
-            function updateMasterCard(online){document.getElementById('masterDot').className='dot '+(online?'green':'red');document.getElementById('masterStatus').textContent=online?'Online':'Offline';}
-            function updateLoraCard(connected){document.getElementById('loraDot').className='dot '+(connected?'green':'red');document.getElementById('loraStatus').textContent=connected?'Connected':'Off';}
-            function updateSlaveCard(online){document.getElementById('slaveDot').className='dot '+(online?'green':'red');document.getElementById('slaveStatus').textContent=online?'Online':'Offline';}
-            function updateMotorBox(running,source){const box=document.getElementById('motorBox'),btn=document.getElementById('startBtn');if(running){box.className='motor-box running';document.getElementById('motorIcon').textContent='RUNNING';document.getElementById('motorState').textContent='ON';document.getElementById('motorSource').textContent='By: '+getSrc(source);document.getElementById('motorRelay').textContent='Relay 1 (NO)';if(btn)btn.disabled=true;}else{box.className='motor-box';document.getElementById('motorIcon').textContent='MOTOR';document.getElementById('motorState').textContent='STOPPED';document.getElementById('motorSource').textContent=source?'By: '+getSrc(source):'';document.getElementById('motorRelay').textContent='Relay 2 (NC)';if(btn)btn.disabled=false;}}
             
             function loadHistory(){window.onValue(window.query(window.ref(db,'motor_history'),window.limitToLast(5)),function(snap){const d=snap.val();if(d){motorHistory=Object.values(d).sort((a,b)=>b.timestamp-a.timestamp).slice(0,5);renderHistory();}});}
             function renderHistory(){const list=document.getElementById('historyList');if(!motorHistory.length){list.innerHTML='<div class="history-empty">No events</div>';return;}let h='';motorHistory.forEach(e=>{const isOn=e.action==='on';h+='<div class="history-item '+(e.source==='push_button'?'push-button':e.source==='web_dashboard'?'web-dashboard':'')+'"><div class="history-icon">'+(isOn?'ON':'OFF')+'</div><div class="history-details"><div class="history-action '+(isOn?'on':'off')+'">'+(isOn?'MOTOR ON':'MOTOR OFF')+'</div><span class="source-badge '+(e.source==='push_button'?'push':e.source==='web_dashboard'?'web':'timer')+'">'+getSrc(e.source)+'</span></div><div class="history-time">'+formatTime(e.timestamp)+'</div></div>';});list.innerHTML=h;}
