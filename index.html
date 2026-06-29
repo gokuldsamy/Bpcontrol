@@ -251,7 +251,6 @@
     <script>
         let motorRunning = false, motorHistory = [], timerInterval = null;
         let pendingTimerMinutes = 0;
-        const OFFLINE_TIMEOUT = 60; // seconds
 
         function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         function clearLogs(path) { window.set(window.ref(window.db, path), null); }
@@ -273,26 +272,25 @@
             
             let cmdId = 0;
             
-            // Check connection manually using existing data
             window.checkConnection = function() {
                 const statusRef = window.ref(db, 'system_status');
                 window.get(statusRef).then((snapshot) => {
                     const data = snapshot.val();
                     if (data) {
-                        const now = Date.now();
-                        const lastUpdate = data.last_update || 0;
-                        const secondsSince = (now - lastUpdate) / 1000;
-                        const online = secondsSince < OFFLINE_TIMEOUT;
-                        const msg = online ? '✅ Master Online (' + Math.floor(secondsSince) + 's ago)' : '❌ Master Offline (last seen ' + formatSecondsAgo(secondsSince) + ')';
+                        const masterOnline = data.wifi_connected === true;
+                        const loraConnected = data.slave_online === true;
+                        const slaveOnline = masterOnline && loraConnected;
+                        let msg = '';
+                        if (masterOnline && loraConnected) msg = '✅ All systems online';
+                        else if (masterOnline && !loraConnected) msg = '⚠️ Master online, LoRa offline';
+                        else if (!masterOnline) msg = '❌ Master offline';
+                        else msg = 'Status: Master=' + masterOnline + ' LoRa=' + loraConnected;
                         document.getElementById('pingResult').textContent = msg;
-                        document.getElementById('pingResult').className = 'ping-result ' + (online ? 'success' : 'fail');
+                        document.getElementById('pingResult').className = 'ping-result ' + (masterOnline ? 'success' : 'fail');
                     } else {
-                        document.getElementById('pingResult').textContent = '❌ No data found';
+                        document.getElementById('pingResult').textContent = '❌ No data';
                         document.getElementById('pingResult').className = 'ping-result fail';
                     }
-                }).catch(() => {
-                    document.getElementById('pingResult').textContent = '❌ Error checking';
-                    document.getElementById('pingResult').className = 'ping-result fail';
                 });
             };
             
@@ -318,16 +316,14 @@
             };
             
             window.setTimerValue = function() {
-                const h = parseInt(document.getElementById('hrs').value) || 0;
-                const m = parseInt(document.getElementById('mins').value) || 0;
+                const h = parseInt(document.getElementById('hrs').value) || 0, m = parseInt(document.getElementById('mins').value) || 0;
                 const total = h * 60 + m;
                 if (total <= 0) { showToast('Set hours or minutes'); return; }
                 if (total > 1440) { showToast('Max 24 hours'); return; }
                 pendingTimerMinutes = total;
                 document.getElementById('timerPreview').textContent = 'Timer: ' + h + 'h ' + m + 'm';
                 document.getElementById('timerPreview').classList.add('show');
-                document.getElementById('hrs').value = 0;
-                document.getElementById('mins').value = 0;
+                document.getElementById('hrs').value = 0; document.getElementById('mins').value = 0;
                 showToast('Timer set - Press START');
             };
             
@@ -335,8 +331,7 @@
                 pendingTimerMinutes = 0;
                 document.getElementById('timerPreview').classList.remove('show');
                 document.getElementById('timerCountdownRunning').classList.remove('show');
-                document.getElementById('hrs').value = 0;
-                document.getElementById('mins').value = 0;
+                document.getElementById('hrs').value = 0; document.getElementById('mins').value = 0;
                 if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
                 showToast('Timer cleared');
             };
@@ -345,19 +340,16 @@
                 window.onValue(window.ref(db, 'system_status'), function(snap) {
                     const d = snap.val();
                     if (d) {
-                        const now = Date.now();
-                        const lastUpdate = d.last_update || 0;
-                        const secondsSinceUpdate = (now - lastUpdate) / 1000;
-                        const isMasterAlive = secondsSinceUpdate < OFFLINE_TIMEOUT;
-                        const masterOnline = d.wifi_connected && isMasterAlive;
-                        const loraConnected = d.slave_online && isMasterAlive;
+                        // TRUST the flags directly from master
+                        const masterOnline = d.wifi_connected === true;
+                        const loraConnected = d.slave_online === true;
                         const slaveOnline = masterOnline && loraConnected;
                         
                         updateMasterCard(masterOnline);
                         updateLoraCard(loraConnected);
                         updateSlaveCard(slaveOnline);
                         updateMotorBox(d.motor_running, d.trigger_source);
-                        updateBanner(masterOnline, loraConnected, slaveOnline, secondsSinceUpdate);
+                        updateBanner(masterOnline, loraConnected, slaveOnline);
                         
                         document.getElementById('statPings').textContent = (d.lora_ping_count || 0).toLocaleString();
                         document.getElementById('statMissed').textContent = d.lora_missed || 0;
@@ -365,10 +357,10 @@
                         if (d.timer_active && d.motor_running && d.timer_seconds > 0) {
                             updateTimerCountdown(true, d.timer_seconds);
                         }
-                        document.getElementById('footerText').textContent = 'Last update: ' + formatSecondsAgo(secondsSinceUpdate);
+                        document.getElementById('footerText').textContent = 'BP Motor Panel';
                     } else {
                         updateMasterCard(false); updateLoraCard(false); updateSlaveCard(false);
-                        updateBanner(false, false, false, 999);
+                        updateBanner(false, false, false);
                     }
                 });
                 
@@ -394,11 +386,9 @@
             
             function updateTimerCountdown(active, secs) {
                 const el = document.getElementById('timerCountdownRunning');
-                const preview = document.getElementById('timerPreview');
                 if (active && secs > 0) {
                     el.textContent = formatCountdown(secs);
                     el.classList.add('show');
-                    preview.classList.remove('show');
                     if (timerInterval) clearInterval(timerInterval);
                     let remaining = secs;
                     timerInterval = setInterval(() => {
@@ -417,15 +407,14 @@
                 return h.toString().padStart(2,'0') + ':' + m.toString().padStart(2,'0') + ':' + sec.toString().padStart(2,'0');
             }
             
-            function updateBanner(masterOk, loraOk, slaveOk, secondsAgo) {
+            function updateBanner(masterOk, loraOk, slaveOk) {
                 const b = document.getElementById('aliveBanner');
-                if (!masterOk && !slaveOk) { b.textContent = 'Devices Offline - ' + formatSecondsAgo(secondsAgo); b.className = 'alive-banner off show'; }
+                if (!masterOk && !slaveOk) { b.textContent = 'Devices Offline'; b.className = 'alive-banner off show'; }
                 else if (masterOk && !loraOk) { b.textContent = 'Master Online - LoRa Off'; b.className = 'alive-banner warn show'; }
                 else if (masterOk && loraOk && slaveOk) { b.textContent = 'All Systems Online'; b.className = 'alive-banner ok show'; }
                 else { b.className = 'alive-banner'; }
             }
             
-            function formatSecondsAgo(s) { if(s<5)return'Just now'; if(s<60)return Math.floor(s)+'s ago'; if(s<3600)return Math.floor(s/60)+'m ago'; return Math.floor(s/3600)+'h ago'; }
             function formatUptime(s) { if(s<60)return s+'s'; if(s<3600)return Math.floor(s/60)+'m'; return Math.floor(s/3600)+'h'; }
             
             function updateMasterCard(online) { document.getElementById('masterDot').className='dot '+(online?'green':'red'); document.getElementById('masterStatus').textContent=online?'Online':'Offline'; }
