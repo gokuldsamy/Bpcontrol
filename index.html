@@ -35,21 +35,14 @@
         html, body { width: 100%; max-width: 100vw; overflow-x: hidden; }
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: #0a0a1a;
-            min-height: 100dvh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            color: white;
-            padding: 0;
+            background: #0a0a1a; min-height: 100dvh;
+            display: flex; justify-content: center; align-items: flex-start;
+            color: white; padding: 0;
         }
         .page { display: none; width: 100%; padding: 8px; }
         .page.active { display: block; }
         
-        .login-box {
-            background: #16213e; padding: 28px 16px; border-radius: 14px;
-            text-align: center; margin-top: 20px; width: 100%;
-        }
+        .login-box { background: #16213e; padding: 28px 16px; border-radius: 14px; text-align: center; margin-top: 20px; width: 100%; }
         .login-box h2 { font-size: 20px; margin-bottom: 4px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .login-box .subtitle { color: #888; font-size: 11px; margin-bottom: 18px; }
         .login-box input { width: 100%; padding: 11px; margin: 4px 0; background: rgba(255,255,255,0.06); border: 1px solid #333; border-radius: 7px; color: white; font-size: 14px; }
@@ -98,7 +91,6 @@
         .status-card .label { color: #999; font-size: 7px; display: block; text-transform: uppercase; letter-spacing: 1px; }
         .status-card .value { color: white; font-weight: 700; font-size: 10px; }
         
-        /* Timer Section */
         .timer-section { background: #0f3460; border-radius: 10px; padding: 10px; margin: 6px 0; text-align: center; }
         .timer-title { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #999; margin-bottom: 6px; }
         .timer-inputs { display: flex; gap: 6px; margin-bottom: 6px; }
@@ -107,13 +99,12 @@
         .timer-group input { width: 100%; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid #333; border-radius: 6px; color: white; font-size: 16px; font-weight: 700; text-align: center; }
         .timer-group input:focus { border-color: #667eea; outline: none; }
         .btn-timer { width: 100%; padding: 8px; background: linear-gradient(135deg, #667eea, #764ba2); border: none; border-radius: 6px; color: white; font-size: 11px; font-weight: 700; cursor: pointer; letter-spacing: 1px; }
-        .btn-timer-clear { width: 100%; padding: 6px; background: transparent; border: 1px solid #444; border-radius: 6px; color: #888; font-size: 10px; cursor: pointer; margin-top: 4px; }
+        .btn-timer-clear { width: 100%; padding: 6px; background: transparent; border: 1px solid #f44336; border-radius: 6px; color: #f44336; font-size: 10px; cursor: pointer; margin-top: 4px; }
         .timer-display { margin-top: 6px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 6px; display: none; }
         .timer-display.active { display: block; }
         .timer-countdown { font-size: 22px; font-weight: 700; color: #ffd54f; letter-spacing: 1px; }
         .timer-label { font-size: 8px; color: #888; text-transform: uppercase; }
         
-        /* Stats Section */
         .stats-row { display: flex; gap: 5px; margin: 6px 0; }
         .stat-card { flex: 1; background: #0f3460; padding: 8px 5px; border-radius: 8px; text-align: center; }
         .stat-card .stat-value { font-size: 16px; font-weight: 700; color: #2196F3; }
@@ -160,7 +151,6 @@
 
     <div class="toast" id="toast"></div>
 
-    <!-- LOGIN -->
     <div class="page active" id="loginPage">
         <div class="login-box">
             <h2>BP Motor Panel</h2>
@@ -172,7 +162,6 @@
         </div>
     </div>
 
-    <!-- DASHBOARD -->
     <div class="page" id="dashboardPage">
         <div class="top-bar">
             <h2>BP Motor Panel</h2>
@@ -183,7 +172,6 @@
         </div>
         <div class="card">
             <div class="user-info" id="userInfo">Welcome</div>
-            
             <div class="motor-box" id="motorBox">
                 <div class="motor-icon" id="motorIcon">MOTOR</div>
                 <div class="motor-state" id="motorState">STOPPED</div>
@@ -200,7 +188,6 @@
                 <div class="status-card"><span class="dot gray" id="slaveDot"></span><span class="label">Slave</span><span class="value" id="slaveStatus">--</span></div>
             </div>
             
-            <!-- TIMER SECTION -->
             <div class="timer-section">
                 <div class="timer-title">Timer</div>
                 <div class="timer-inputs">
@@ -215,7 +202,6 @@
                 </div>
             </div>
             
-            <!-- QUICK STATS -->
             <div class="stats-row">
                 <div class="stat-card"><div class="stat-value" id="statPings">0</div><div class="stat-label">Pings</div></div>
                 <div class="stat-card"><div class="stat-value" id="statMissed">0</div><div class="stat-label">Missed</div></div>
@@ -231,7 +217,6 @@
         <div class="footer-text">BP Motor Panel</div>
     </div>
 
-    <!-- LOGS -->
     <div class="page" id="logsPage">
         <div class="top-bar">
             <h2>Shell Logs</h2>
@@ -259,12 +244,10 @@
         
         window.addEventListener('firebase-ready', function() {
             const auth = window.auth, db = window.db;
-            
             window.onAuthStateChanged(auth, function(user) {
                 if (user) { showPage('dashboardPage'); document.getElementById('userInfo').textContent = user.email; setupListeners(); loadHistory(); loadShellLogs(); }
                 else { showPage('loginPage'); }
             });
-            
             window.doLogin = function() {
                 const email = document.getElementById('emailInput').value.trim(), password = document.getElementById('passwordInput').value;
                 const err = document.getElementById('loginError'); err.classList.remove('show');
@@ -277,10 +260,9 @@
             let cmdId = 0;
             window.startMotor = function() { cmdId++; window.set(window.ref(db, 'motor_control'), {command:'on',command_id:cmdId,timestamp:Date.now(),source:'web_dashboard'}); showToast('Starting...'); };
             window.stopMotor = function() { cmdId++; window.set(window.ref(db, 'motor_control'), {command:'off',command_id:cmdId,timestamp:Date.now(),source:'web_dashboard'}); showToast('Stopping...'); };
-            
             window.setTimer = function() {
-                const h = parseInt(document.getElementById('hrs').value)||0, m = parseInt(document.getElementById('mins').value)||0;
-                const total = h*60+m;
+                const h=parseInt(document.getElementById('hrs').value)||0, m=parseInt(document.getElementById('mins').value)||0;
+                const total=h*60+m;
                 if(total<=0){showToast('Set hours or minutes');return;}
                 if(total>1440){showToast('Max 24 hours');return;}
                 cmdId++;
@@ -290,111 +272,60 @@
             };
             window.clearTimer = function() {
                 cmdId++;
-                window.set(window.ref(db, 'motor_control'), {command:'off',command_id:cmdId,timestamp:Date.now(),source:'timer_cancel'});
+                window.set(window.ref(db, 'motor_control'), {command:'off',command_id:cmdId,timestamp:Date.now(),source:'web_dashboard'});
                 document.getElementById('timerDisplay').classList.remove('active');
                 if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-                showToast('Timer cleared');
+                showToast('Timer cancelled');
             };
             
             function setupListeners() {
                 window.onValue(window.ref(db, 'system_status'), function(snap) {
-                    const d = snap.val();
-                    if (d) {
+                    const d=snap.val();
+                    if(d){
                         updateMasterCard(d.wifi_connected);
                         updateLoraCard(d.slave_online);
-                        updateSlaveCard(d.slave_online && d.wifi_connected);
-                        updateMotorBox(d.motor_running, d.trigger_source);
-                        document.getElementById('statPings').textContent = (d.lora_ping_count||0).toLocaleString();
-                        document.getElementById('statMissed').textContent = d.lora_missed||0;
-                        if (d.timer_active) { updateTimerDisplay(true, d.timer_seconds); }
+                        updateSlaveCard(d.slave_online&&d.wifi_connected);
+                        updateMotorBox(d.motor_running,d.trigger_source);
+                        document.getElementById('statPings').textContent=(d.lora_ping_count||0).toLocaleString();
+                        document.getElementById('statMissed').textContent=d.lora_missed||0;
+                        if(d.timer_active){updateTimerDisplay(true,d.timer_seconds);}
                     }
                 });
                 window.onValue(window.ref(db, 'slave_details'), function(snap) {
-                    const d = snap.val();
-                    if (d) {
-                        document.getElementById('statRestarts').textContent = d.restart_count||0;
-                        document.getElementById('statUptime').textContent = formatUptime(d.uptime||0);
-                    }
+                    const d=snap.val();
+                    if(d){document.getElementById('statRestarts').textContent=d.restart_count||0;document.getElementById('statUptime').textContent=formatUptime(d.uptime||0);}
                 });
                 window.onValue(window.ref(db, 'timer'), function(snap) {
-                    const d = snap.val();
-                    if (d && d.active) { updateTimerDisplay(true, d.remaining_seconds); }
-                    else if (!d || !d.active) { updateTimerDisplay(false, 0); }
+                    const d=snap.val();
+                    if(d&&d.active){updateTimerDisplay(true,d.remaining_seconds);}
+                    else{updateTimerDisplay(false,0);}
                 });
             }
             
-            function updateTimerDisplay(active, secs) {
-                const display = document.getElementById('timerDisplay');
-                const countdown = document.getElementById('timerCountdown');
-                if (active && secs > 0) {
-                    display.classList.add('active');
-                    countdown.textContent = formatCountdown(secs);
-                    if (timerInterval) clearInterval(timerInterval);
-                    let remaining = secs;
-                    timerInterval = setInterval(() => {
-                        remaining--;
-                        if (remaining <= 0) { clearInterval(timerInterval); display.classList.remove('active'); }
-                        else { countdown.textContent = formatCountdown(remaining); }
-                    }, 1000);
-                } else {
-                    display.classList.remove('active');
-                    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-                }
+            function updateTimerDisplay(active,secs){
+                const display=document.getElementById('timerDisplay'),countdown=document.getElementById('timerCountdown');
+                if(active&&secs>0){display.classList.add('active');countdown.textContent=formatCountdown(secs);if(timerInterval)clearInterval(timerInterval);let r=secs;timerInterval=setInterval(()=>{r--;if(r<=0){clearInterval(timerInterval);display.classList.remove('active');}else{countdown.textContent=formatCountdown(r);}},1000);}
+                else{display.classList.remove('active');if(timerInterval){clearInterval(timerInterval);timerInterval=null;}}
             }
+            function formatCountdown(s){const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return h.toString().padStart(2,'0')+':'+m.toString().padStart(2,'0')+':'+sec.toString().padStart(2,'0');}
+            function formatUptime(s){if(s<60)return s+'s';if(s<3600)return Math.floor(s/60)+'m';return Math.floor(s/3600)+'h';}
             
-            function formatCountdown(s) {
-                const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
-                return h.toString().padStart(2,'0')+':'+m.toString().padStart(2,'0')+':'+sec.toString().padStart(2,'0');
-            }
-            function formatUptime(s) { if(s<60)return s+'s'; if(s<3600)return Math.floor(s/60)+'m'; return Math.floor(s/3600)+'h'; }
+            function updateMasterCard(online){document.getElementById('masterDot').className='dot '+(online?'green':'red');document.getElementById('masterStatus').textContent=online?'Online':'Offline';}
+            function updateLoraCard(connected){document.getElementById('loraDot').className='dot '+(connected?'green':'red');document.getElementById('loraStatus').textContent=connected?'Connected':'Off';}
+            function updateSlaveCard(online){document.getElementById('slaveDot').className='dot '+(online?'green':'red');document.getElementById('slaveStatus').textContent=online?'Online':'Offline';}
+            function updateMotorBox(running,source){const box=document.getElementById('motorBox'),btn=document.getElementById('startBtn');if(running){box.className='motor-box running';document.getElementById('motorIcon').textContent='RUNNING';document.getElementById('motorState').textContent='ON';document.getElementById('motorSource').textContent='By: '+getSrc(source);document.getElementById('motorRelay').textContent='Relay 1 (NO)';if(btn)btn.disabled=true;}else{box.className='motor-box';document.getElementById('motorIcon').textContent='MOTOR';document.getElementById('motorState').textContent='STOPPED';document.getElementById('motorSource').textContent=source?'By: '+getSrc(source):'';document.getElementById('motorRelay').textContent='Relay 2 (NC)';if(btn)btn.disabled=false;}}
             
-            function updateMasterCard(online) { document.getElementById('masterDot').className = 'dot '+(online?'green':'red'); document.getElementById('masterStatus').textContent = online?'Online':'Offline'; }
-            function updateLoraCard(connected) { document.getElementById('loraDot').className = 'dot '+(connected?'green':'red'); document.getElementById('loraStatus').textContent = connected?'Connected':'Off'; }
-            function updateSlaveCard(online) { document.getElementById('slaveDot').className = 'dot '+(online?'green':'red'); document.getElementById('slaveStatus').textContent = online?'Online':'Offline'; }
-            function updateMotorBox(running, source) {
-                const box = document.getElementById('motorBox'), btn = document.getElementById('startBtn');
-                if (running) { box.className = 'motor-box running'; document.getElementById('motorIcon').textContent = 'RUNNING'; document.getElementById('motorState').textContent = 'ON'; document.getElementById('motorSource').textContent = 'By: '+getSrc(source); document.getElementById('motorRelay').textContent = 'Relay 1 (NO)'; if(btn) btn.disabled = true; }
-                else { box.className = 'motor-box'; document.getElementById('motorIcon').textContent = 'MOTOR'; document.getElementById('motorState').textContent = 'STOPPED'; document.getElementById('motorSource').textContent = source?'By: '+getSrc(source):''; document.getElementById('motorRelay').textContent = 'Relay 2 (NC)'; if(btn) btn.disabled = false; }
-            }
+            function loadHistory(){window.onValue(window.query(window.ref(db,'motor_history'),window.limitToLast(5)),function(snap){const d=snap.val();if(d){motorHistory=Object.values(d).sort((a,b)=>b.timestamp-a.timestamp).slice(0,5);renderHistory();}});}
+            function renderHistory(){const list=document.getElementById('historyList');if(!motorHistory.length){list.innerHTML='<div class="history-empty">No events</div>';return;}let h='';motorHistory.forEach(e=>{const isOn=e.action==='on';h+='<div class="history-item '+(e.source==='push_button'?'push-button':e.source==='web_dashboard'?'web-dashboard':'')+'"><div class="history-icon">'+(isOn?'ON':'OFF')+'</div><div class="history-details"><div class="history-action '+(isOn?'on':'off')+'">'+(isOn?'MOTOR ON':'MOTOR OFF')+'</div><span class="source-badge '+(e.source==='push_button'?'push':e.source==='web_dashboard'?'web':'timer')+'">'+getSrc(e.source)+'</span></div><div class="history-time">'+formatTime(e.timestamp)+'</div></div>';});list.innerHTML=h;}
             
-            function loadHistory() {
-                window.onValue(window.query(window.ref(db, 'motor_history'), window.limitToLast(5)), function(snap) {
-                    const data = snap.val(); if (data) { motorHistory = Object.values(data).reverse().slice(0,5); renderHistory(); }
-                });
-            }
-            function renderHistory() {
-                const list = document.getElementById('historyList');
-                if (!motorHistory.length) { list.innerHTML = '<div class="history-empty">No events</div>'; return; }
-                let html = '';
-                motorHistory.forEach(e => {
-                    const isOn = e.action==='on';
-                    html += '<div class="history-item '+(e.source==='push_button'?'push-button':e.source==='web_dashboard'?'web-dashboard':'')+'">'+
-                        '<div class="history-icon">'+(isOn?'ON':'OFF')+'</div><div class="history-details">'+
-                        '<div class="history-action '+(isOn?'on':'off')+'">'+(isOn?'MOTOR ON':'MOTOR OFF')+'</div>'+
-                        '<span class="source-badge '+(e.source==='push_button'?'push':e.source==='web_dashboard'?'web':'timer')+'">'+getSrc(e.source)+'</span>'+
-                        '</div><div class="history-time">'+formatTime(e.timestamp)+'</div></div>';
-                });
-                list.innerHTML = html;
-            }
-            
-            function loadShellLogs() {
-                window.onValue(window.query(window.ref(db, 'master_logs'), window.limitToLast(30)), function(snap) {
-                    const data = snap.val();
-                    document.getElementById('masterContent').innerHTML = data ? renderLogs(Object.values(data).sort((a,b)=>b.time-a.time)) : '<div class="log-empty">No logs</div>';
-                });
-                window.onValue(window.query(window.ref(db, 'slave_logs'), window.limitToLast(30)), function(snap) {
-                    const data = snap.val();
-                    document.getElementById('slaveContent').innerHTML = data ? renderLogs(Object.values(data).sort((a,b)=>b.time-a.time)) : '<div class="log-empty">No logs</div>';
-                });
-            }
-            function renderLogs(logs) { let html=''; logs.forEach(l=>{ const t=formatLogTime(l.time); html+='<div class="log-line"><span class="log-time">'+t+'</span><span class="log-msg '+(l.type||'info')+'">'+(l.msg||l.message||'')+'</span></div>'; }); return html||'<div class="log-empty">No logs</div>'; }
-            function formatLogTime(ts) { if(!ts||ts<1e12) return '--:--'; const d=new Date(ts); if(isNaN(d.getTime())) return '--:--'; return d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true}); }
-            function getSrc(s) { const m={push_button:'Button',web_dashboard:'Web',timer:'Timer',timer_complete:'Timer'}; return m[s]||s||'System'; }
-            function formatTime(ts) { if(!ts||ts<1e12) return '--'; const d=new Date(ts); if(isNaN(d.getTime())) return '--'; const n=new Date(),df=n-d; const ds=d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); const ts2=d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}); if(df<6e4) return 'Now'; if(df<36e5) return Math.floor(df/6e4)+'m'; if(df<864e5) return ts2; return ds+' '+ts2; }
+            function loadShellLogs(){window.onValue(window.query(window.ref(db,'master_logs'),window.limitToLast(30)),function(snap){const d=snap.val();document.getElementById('masterContent').innerHTML=d?renderLogs(Object.values(d).sort((a,b)=>b.time-a.time)):'<div class="log-empty">No logs</div>';});window.onValue(window.query(window.ref(db,'slave_logs'),window.limitToLast(30)),function(snap){const d=snap.val();document.getElementById('slaveContent').innerHTML=d?renderLogs(Object.values(d).sort((a,b)=>b.time-a.time)):'<div class="log-empty">No logs</div>';});}
+            function renderLogs(logs){let h='';logs.forEach(l=>{const t=formatLogTime(l.time);h+='<div class="log-line"><span class="log-time">'+t+'</span><span class="log-msg '+(l.type||'info')+'">'+(l.msg||l.message||'')+'</span></div>';});return h||'<div class="log-empty">No logs</div>';}
+            function formatLogTime(ts){if(!ts||ts<1e12)return'--:--';const d=new Date(ts);if(isNaN(d.getTime()))return'--:--';return d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});}
+            function getSrc(s){const m={push_button:'Button',web_dashboard:'Web',timer:'Timer',timer_complete:'Timer'};return m[s]||s||'System';}
+            function formatTime(ts){if(!ts||ts<1e12)return'--';const d=new Date(ts);if(isNaN(d.getTime()))return'--';const n=new Date(),df=n-d;const ds=d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});const ts2=d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});if(df<6e4)return'Now';if(df<36e5)return Math.floor(df/6e4)+'m';if(df<864e5)return ts2;return ds+' '+ts2;}
         });
-        
-        function showToast(m) { const t=document.getElementById('toast'); if(t){t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);} }
-        document.addEventListener('keypress',function(e){ if(e.key==='Enter'&&document.getElementById('loginPage').classList.contains('active'))doLogin(); });
+        function showToast(m){const t=document.getElementById('toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}}
+        document.addEventListener('keypress',function(e){if(e.key==='Enter'&&document.getElementById('loginPage').classList.contains('active'))doLogin();});
     </script>
 </body>
 </html>
