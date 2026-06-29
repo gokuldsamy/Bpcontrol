@@ -62,6 +62,13 @@
         .card { background: #16213e; padding: 12px 10px; border-radius: 14px; width: 100%; }
         .user-info { color: #888; font-size: 10px; margin-bottom: 4px; text-align: center; }
         
+        /* Status Banner */
+        .alive-banner { padding: 6px 10px; border-radius: 6px; margin-bottom: 6px; text-align: center; font-size: 10px; font-weight: 600; display: none; }
+        .alive-banner.show { display: block; }
+        .alive-banner.off { background: rgba(244,67,54,0.2); color: #f44336; border: 1px solid rgba(244,67,54,0.4); }
+        .alive-banner.warn { background: rgba(255,152,0,0.2); color: #FF9800; border: 1px solid rgba(255,152,0,0.4); }
+        .alive-banner.ok { background: rgba(76,175,80,0.2); color: #4CAF50; border: 1px solid rgba(76,175,80,0.4); }
+        
         .motor-box { background: #0f3460; border-radius: 12px; padding: 14px 10px; margin: 6px 0; text-align: center; border: 2px solid #f44336; transition: all 0.4s; }
         .motor-box.running { border-color: #4CAF50; box-shadow: 0 0 25px rgba(76,175,80,0.3); }
         .motor-box .motor-icon { font-size: 28px; margin-bottom: 2px; }
@@ -135,11 +142,6 @@
         .log-line { padding: 0; border-bottom: 1px solid rgba(255,255,255,0.02); display: flex; gap: 4px; }
         .log-time { color: #555; white-space: nowrap; font-size: 7px; min-width: 50px; }
         .log-msg { word-break: break-all; }
-        .log-msg.info { color: #aaa; }
-        .log-msg.button { color: #FF9800; font-weight: bold; }
-        .log-msg.error { color: #f44336; }
-        .log-msg.success { color: #4CAF50; }
-        .log-msg.slave { color: #81C784; }
         .log-empty { text-align: center; color: #555; padding: 12px; font-size: 9px; }
         
         .footer-text { color: #555; font-size: 7px; margin-top: 5px; text-align: center; }
@@ -172,6 +174,10 @@
         </div>
         <div class="card">
             <div class="user-info" id="userInfo">Welcome</div>
+            
+            <!-- STATUS BANNER -->
+            <div class="alive-banner" id="aliveBanner"></div>
+            
             <div class="motor-box" id="motorBox">
                 <div class="motor-icon" id="motorIcon">MOTOR</div>
                 <div class="motor-state" id="motorState">STOPPED</div>
@@ -214,7 +220,7 @@
                 <div class="history-list" id="historyList"><div class="history-empty">Waiting...</div></div>
             </div>
         </div>
-        <div class="footer-text">BP Motor Panel</div>
+        <div class="footer-text" id="footerText">BP Motor Panel</div>
     </div>
 
     <div class="page" id="logsPage">
@@ -238,6 +244,7 @@
 
     <script>
         let motorRunning = false, motorHistory = [], timerInterval = null;
+        const OFFLINE_TIMEOUT = 30; // 30 seconds without update = offline
         
         function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
         function clearLogs(path) { window.set(window.ref(window.db, path), null); }
@@ -262,33 +269,45 @@
             window.stopMotor = function() { cmdId++; window.set(window.ref(db, 'motor_control'), {command:'off',command_id:cmdId,timestamp:Date.now(),source:'web_dashboard'}); showToast('Stopping...'); };
             window.setTimer = function() {
                 const h=parseInt(document.getElementById('hrs').value)||0, m=parseInt(document.getElementById('mins').value)||0;
-                const total=h*60+m;
-                if(total<=0){showToast('Set hours or minutes');return;}
-                if(total>1440){showToast('Max 24 hours');return;}
-                cmdId++;
-                window.set(window.ref(db, 'motor_control'), {command:'timer',command_id:cmdId,timestamp:Date.now(),source:'web_dashboard',minutes:total});
-                showToast('Timer: '+h+'h '+m+'m');
-                document.getElementById('hrs').value=0; document.getElementById('mins').value=0;
+                const total=h*60+m; if(total<=0){showToast('Set hours or minutes');return;} if(total>1440){showToast('Max 24 hours');return;}
+                cmdId++; window.set(window.ref(db, 'motor_control'), {command:'timer',command_id:cmdId,timestamp:Date.now(),source:'web_dashboard',minutes:total});
+                showToast('Timer: '+h+'h '+m+'m'); document.getElementById('hrs').value=0; document.getElementById('mins').value=0;
             };
             window.clearTimer = function() {
-                cmdId++;
-                window.set(window.ref(db, 'motor_control'), {command:'off',command_id:cmdId,timestamp:Date.now(),source:'web_dashboard'});
-                document.getElementById('timerDisplay').classList.remove('active');
-                if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-                showToast('Timer cancelled');
+                cmdId++; window.set(window.ref(db, 'motor_control'), {command:'off',command_id:cmdId,timestamp:Date.now(),source:'web_dashboard'});
+                document.getElementById('timerDisplay').classList.remove('active'); if(timerInterval){clearInterval(timerInterval);timerInterval=null;} showToast('Timer cancelled');
             };
             
             function setupListeners() {
                 window.onValue(window.ref(db, 'system_status'), function(snap) {
                     const d=snap.val();
                     if(d){
-                        updateMasterCard(d.wifi_connected);
-                        updateLoraCard(d.slave_online);
-                        updateSlaveCard(d.slave_online&&d.wifi_connected);
-                        updateMotorBox(d.motor_running,d.trigger_source);
+                        // CHECK TIME since last update
+                        const now = Date.now();
+                        const lastUpdate = d.last_update || 0;
+                        const secondsSinceUpdate = (now - lastUpdate) / 1000;
+                        const isMasterAlive = secondsSinceUpdate < OFFLINE_TIMEOUT;
+                        
+                        // Master is alive ONLY if updated recently
+                        const masterOnline = d.wifi_connected && isMasterAlive;
+                        const loraConnected = d.slave_online && isMasterAlive;
+                        const slaveOnline = masterOnline && loraConnected;
+                        
+                        updateMasterCard(masterOnline);
+                        updateLoraCard(loraConnected);
+                        updateSlaveCard(slaveOnline);
+                        updateMotorBox(d.motor_running, d.trigger_source);
+                        updateBanner(masterOnline, loraConnected, slaveOnline, secondsSinceUpdate);
+                        
                         document.getElementById('statPings').textContent=(d.lora_ping_count||0).toLocaleString();
                         document.getElementById('statMissed').textContent=d.lora_missed||0;
                         if(d.timer_active){updateTimerDisplay(true,d.timer_seconds);}
+                        
+                        document.getElementById('footerText').textContent = 'Last update: ' + formatSecondsAgo(secondsSinceUpdate);
+                    } else {
+                        // No data at all
+                        updateMasterCard(false); updateLoraCard(false); updateSlaveCard(false);
+                        updateBanner(false, false, false, 999);
                     }
                 });
                 window.onValue(window.ref(db, 'slave_details'), function(snap) {
@@ -297,10 +316,19 @@
                 });
                 window.onValue(window.ref(db, 'timer'), function(snap) {
                     const d=snap.val();
-                    if(d&&d.active){updateTimerDisplay(true,d.remaining_seconds);}
-                    else{updateTimerDisplay(false,0);}
+                    if(d&&d.active){updateTimerDisplay(true,d.remaining_seconds);}else{updateTimerDisplay(false,0);}
                 });
             }
+            
+            function updateBanner(masterOk, loraOk, slaveOk, secondsAgo) {
+                const b = document.getElementById('aliveBanner');
+                if (!masterOk && !slaveOk) { b.textContent = 'Devices Offline - Last seen: ' + formatSecondsAgo(secondsAgo); b.className = 'alive-banner off show'; }
+                else if (masterOk && !loraOk) { b.textContent = 'Master Online - LoRa Disconnected'; b.className = 'alive-banner warn show'; }
+                else if (masterOk && loraOk && slaveOk) { b.textContent = 'All Systems Online'; b.className = 'alive-banner ok show'; }
+                else { b.className = 'alive-banner'; }
+            }
+            
+            function formatSecondsAgo(s) { if(s<5)return 'Just now'; if(s<60)return Math.floor(s)+'s ago'; if(s<3600)return Math.floor(s/60)+'m ago'; return Math.floor(s/3600)+'h ago'; }
             
             function updateTimerDisplay(active,secs){
                 const display=document.getElementById('timerDisplay'),countdown=document.getElementById('timerCountdown');
@@ -319,7 +347,7 @@
             function renderHistory(){const list=document.getElementById('historyList');if(!motorHistory.length){list.innerHTML='<div class="history-empty">No events</div>';return;}let h='';motorHistory.forEach(e=>{const isOn=e.action==='on';h+='<div class="history-item '+(e.source==='push_button'?'push-button':e.source==='web_dashboard'?'web-dashboard':'')+'"><div class="history-icon">'+(isOn?'ON':'OFF')+'</div><div class="history-details"><div class="history-action '+(isOn?'on':'off')+'">'+(isOn?'MOTOR ON':'MOTOR OFF')+'</div><span class="source-badge '+(e.source==='push_button'?'push':e.source==='web_dashboard'?'web':'timer')+'">'+getSrc(e.source)+'</span></div><div class="history-time">'+formatTime(e.timestamp)+'</div></div>';});list.innerHTML=h;}
             
             function loadShellLogs(){window.onValue(window.query(window.ref(db,'master_logs'),window.limitToLast(30)),function(snap){const d=snap.val();document.getElementById('masterContent').innerHTML=d?renderLogs(Object.values(d).sort((a,b)=>b.time-a.time)):'<div class="log-empty">No logs</div>';});window.onValue(window.query(window.ref(db,'slave_logs'),window.limitToLast(30)),function(snap){const d=snap.val();document.getElementById('slaveContent').innerHTML=d?renderLogs(Object.values(d).sort((a,b)=>b.time-a.time)):'<div class="log-empty">No logs</div>';});}
-            function renderLogs(logs){let h='';logs.forEach(l=>{const t=formatLogTime(l.time);h+='<div class="log-line"><span class="log-time">'+t+'</span><span class="log-msg '+(l.type||'info')+'">'+(l.msg||l.message||'')+'</span></div>';});return h||'<div class="log-empty">No logs</div>';}
+            function renderLogs(logs){let h='';logs.forEach(l=>{const t=formatLogTime(l.time);h+='<div class="log-line"><span class="log-time">'+t+'</span><span class="log-msg">'+(l.msg||l.message||'')+'</span></div>';});return h||'<div class="log-empty">No logs</div>';}
             function formatLogTime(ts){if(!ts||ts<1e12)return'--:--';const d=new Date(ts);if(isNaN(d.getTime()))return'--:--';return d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});}
             function getSrc(s){const m={push_button:'Button',web_dashboard:'Web',timer:'Timer',timer_complete:'Timer'};return m[s]||s||'System';}
             function formatTime(ts){if(!ts||ts<1e12)return'--';const d=new Date(ts);if(isNaN(d.getTime()))return'--';const n=new Date(),df=n-d;const ds=d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});const ts2=d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});if(df<6e4)return'Now';if(df<36e5)return Math.floor(df/6e4)+'m';if(df<864e5)return ts2;return ds+' '+ts2;}
