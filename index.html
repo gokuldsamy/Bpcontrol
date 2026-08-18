@@ -43,50 +43,33 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             background: #0a0a1a;
             min-height: 100dvh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            color: white;
-            padding: 0;
+            display: flex; justify-content: center; align-items: flex-start;
+            color: #ffffff; padding: 0;
         }
         .page { display: none; width: 100%; padding: 8px; }
         .page.active { display: block; }
         
         .login-box {
-            background: #16213e;
-            padding: 28px 16px;
-            border-radius: 14px;
-            text-align: center;
-            margin-top: 20px;
-            width: 100%;
+            background: #16213e; padding: 28px 16px; border-radius: 14px;
+            text-align: center; margin-top: 20px; width: 100%;
         }
         .login-box h2 {
-            font-size: 20px;
-            margin-bottom: 4px;
+            font-size: 20px; margin-bottom: 4px;
             background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .login-box .subtitle { color: #888; font-size: 11px; margin-bottom: 18px; }
+        .login-box .subtitle { color: #aaa; font-size: 11px; margin-bottom: 18px; }
         .login-box input {
             width: 100%; padding: 11px; margin: 4px 0;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid #333;
-            border-radius: 7px;
-            color: white;
-            font-size: 14px;
+            background: rgba(255,255,255,0.06); border: 1px solid #444;
+            border-radius: 7px; color: #ffffff; font-size: 14px;
         }
         .login-box input:focus { border-color: #667eea; outline: none; }
         .login-box button {
             width: 100%; padding: 13px;
             background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 7px;
-            color: white;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 8px;
+            border: none; border-radius: 7px; color: #ffffff;
+            font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px;
         }
         .login-box button:disabled { opacity: 0.6; }
         .error-msg {
@@ -103,38 +86,28 @@
         .top-bar h2 {
             font-size: 16px;
             background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         .top-bar-buttons { display: flex; gap: 3px; flex-wrap: wrap; }
         .btn-sm {
             padding: 5px 8px; border: none; border-radius: 5px;
-            font-size: 8px; cursor: pointer; color: white;
-            font-weight: 600;
+            font-size: 8px; cursor: pointer; color: #ffffff; font-weight: 600;
         }
         .btn-logs { background: #9C27B0; }
         .btn-logout { background: rgba(244,67,54,0.2); border: 1px solid #f44336; color: #f44336; }
         .btn-ping { background: #FF9800; }
         .btn-restart { background: #f44336; }
         .btn-back {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid #444;
-            color: #ccc;
-            font-size: 11px;
-            padding: 7px;
-            border-radius: 7px;
-            cursor: pointer;
-            margin-bottom: 6px;
-            width: 100%;
+            background: rgba(255,255,255,0.06); border: 1px solid #444;
+            color: #ccc; font-size: 11px; padding: 7px; border-radius: 7px;
+            cursor: pointer; margin-bottom: 6px; width: 100%;
         }
         
         .card {
-            background: #16213e;
-            padding: 12px 10px;
-            border-radius: 14px;
-            width: 100%;
+            background: #16213e; padding: 12px 10px;
+            border-radius: 14px; width: 100%;
         }
-        .user-info { color: #888; font-size: 10px; margin-bottom: 4px; text-align: center; }
+        .user-info { color: #aaa; font-size: 10px; margin-bottom: 4px; text-align: center; }
         
         .alive-banner {
             padding: 6px 10px; border-radius: 6px; margin-bottom: 6px;
@@ -159,13 +132,13 @@
         }
         .motor-box.running .motor-state { color: #4CAF50; }
         .motor-box:not(.running) .motor-state { color: #f44336; }
-        .motor-box .motor-info { font-size: 9px; color: #999; margin-top: 1px; }
+        .motor-box .motor-info { font-size: 9px; color: #aaa; margin-top: 1px; }
         .motor-box .motor-relay {
             font-size: 8px; margin-top: 4px; padding: 2px 8px;
             border-radius: 10px; display: inline-block; font-weight: 700;
         }
-        .motor-box.running .motor-relay { background: rgba(76,175,80,0.25); color: #66bb6a; }
-        .motor-box:not(.running) .motor-relay { background: rgba(244,67,54,0.25); color: #ef5350; }
+        .motor-box.running .motor-relay { background: rgba(76,175,80,0.25); color: #81C784; }
+        .motor-box:not(.running) .motor-relay { background: rgba(244,67,54,0.25); color: #EF9A9A; }
         .timer-preview { font-size: 10px; color: #ffd54f; margin-top: 4px; font-weight: 700; display: none; }
         .timer-preview.show { display: block; }
         .timer-countdown-running {
@@ -174,14 +147,11 @@
         }
         .timer-countdown-running.show { display: block; }
         
-        .btn-row {
-            display: flex; gap: 6px; justify-content: center;
-            margin: 8px 0; flex-wrap: wrap;
-        }
+        .btn-row { display: flex; gap: 6px; justify-content: center; margin: 8px 0; flex-wrap: wrap; }
         .btn {
             padding: 12px 16px; border: none; border-radius: 10px;
             font-size: 13px; font-weight: 700; cursor: pointer;
-            color: white; min-width: 70px;
+            color: #ffffff; min-width: 70px;
         }
         .btn:active { transform: scale(0.95); }
         .btn-start { background: #4CAF50; }
@@ -197,10 +167,10 @@
         .dot.green { background: #4CAF50; }
         .dot.red { background: #f44336; }
         .dot.gray { background: #666; }
-        .status-card .label { color: #999; font-size: 7px; display: block; text-transform: uppercase; letter-spacing: 1px; }
-        .status-card .value { color: white; font-weight: 700; font-size: 10px; }
+        .status-card .label { color: #aaa; font-size: 7px; display: block; text-transform: uppercase; letter-spacing: 1px; }
+        .status-card .value { color: #ffffff; font-weight: 700; font-size: 10px; }
         
-        .ping-result { font-size: 9px; margin-top: 4px; text-align: center; display: none; }
+        .ping-result { font-size: 9px; margin-top: 4px; text-align: center; display: none; color: #ffffff; }
         .ping-result.success { color: #4CAF50; display: block; }
         .ping-result.fail { color: #f44336; display: block; }
         
@@ -210,24 +180,24 @@
         }
         .timer-title {
             font-size: 9px; font-weight: 700; letter-spacing: 2px;
-            text-transform: uppercase; color: #999; margin-bottom: 6px;
+            text-transform: uppercase; color: #aaa; margin-bottom: 6px;
         }
         .timer-inputs { display: flex; gap: 6px; margin-bottom: 6px; }
         .timer-group { flex: 1; }
         .timer-group label {
-            display: block; font-size: 7px; color: #888;
+            display: block; font-size: 7px; color: #aaa;
             text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;
         }
         .timer-group input {
             width: 100%; padding: 8px; background: rgba(0,0,0,0.3);
-            border: 1px solid #333; border-radius: 6px; color: white;
+            border: 1px solid #444; border-radius: 6px; color: #ffffff;
             font-size: 16px; font-weight: 700; text-align: center;
         }
         .timer-group input:focus { border-color: #667eea; outline: none; }
         .btn-timer {
             width: 100%; padding: 8px;
             background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none; border-radius: 6px; color: white;
+            border: none; border-radius: 6px; color: #ffffff;
             font-size: 11px; font-weight: 700; cursor: pointer;
         }
         .btn-timer-clear {
@@ -241,9 +211,9 @@
             flex: 1; background: #0f3460; padding: 8px 5px;
             border-radius: 8px; text-align: center;
         }
-        .stat-card .stat-value { font-size: 16px; font-weight: 700; color: #2196F3; }
+        .stat-card .stat-value { font-size: 16px; font-weight: 700; color: #64B5F6; }
         .stat-card .stat-label {
-            font-size: 7px; color: #888; text-transform: uppercase;
+            font-size: 7px; color: #aaa; text-transform: uppercase;
             letter-spacing: 1px; margin-top: 2px;
         }
         
@@ -253,9 +223,9 @@
         }
         .history-title {
             font-size: 8px; font-weight: 700; letter-spacing: 2px;
-            text-transform: uppercase; color: #999; margin-bottom: 5px; text-align: center;
+            text-transform: uppercase; color: #aaa; margin-bottom: 5px; text-align: center;
         }
-        .history-list { max-height: 90px; overflow-y: auto; }
+        .history-list { max-height: 150px; overflow-y: auto; }
         .history-item {
             display: flex; align-items: center; padding: 5px 6px;
             margin: 1px 0; background: rgba(0,0,0,0.3); border-radius: 5px;
@@ -273,42 +243,42 @@
             font-size: 7px; font-weight: 700; margin-top: 1px;
         }
         .source-badge.push { background: rgba(255,152,0,0.2); color: #FF9800; }
-        .source-badge.web { background: rgba(33,150,243,0.2); color: #2196F3; }
-        .source-badge.timer { background: rgba(156,39,176,0.2); color: #9C27B0; }
-        .history-time { font-size: 7px; color: #777; white-space: nowrap; }
-        .history-empty { text-align: center; color: #666; padding: 10px; font-size: 10px; }
+        .source-badge.web { background: rgba(33,150,243,0.2); color: #64B5F6; }
+        .source-badge.timer { background: rgba(156,39,176,0.2); color: #CE93D8; }
+        .history-time { font-size: 7px; color: #aaa; white-space: nowrap; }
+        .history-empty { text-align: center; color: #aaa; padding: 10px; font-size: 10px; }
         
         .shell-box {
             background: #0a0a0a; border-radius: 6px; border: 1px solid #333;
-            overflow: hidden; margin-bottom: 6px;
+            overflow: hidden; margin-bottom: 8px;
         }
         .shell-header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 5px 8px; background: #1a1a1a; border-bottom: 1px solid #333;
-            font-size: 9px; color: #aaa; font-weight: 600;
+            padding: 6px 10px; background: #1a1a1a; border-bottom: 1px solid #333;
+            font-size: 10px; color: #cccccc; font-weight: 600;
         }
         .btn-clear {
-            padding: 2px 5px; background: rgba(244,67,54,0.2);
+            padding: 2px 6px; background: rgba(244,67,54,0.2);
             border: 1px solid #f44336; color: #f44336;
-            border-radius: 3px; font-size: 7px; cursor: pointer;
+            border-radius: 3px; font-size: 8px; cursor: pointer;
         }
         .shell-content {
-            padding: 5px; max-height: 160px; overflow-y: auto;
-            font-family: 'Courier New', monospace; font-size: 8px;
-            line-height: 1.2; color: #ccc;
+            padding: 8px; max-height: 250px; overflow-y: auto;
+            font-family: 'Courier New', monospace; font-size: 9px;
+            line-height: 1.4; color: #e0e0e0;
         }
         .log-line {
-            padding: 0; border-bottom: 1px solid rgba(255,255,255,0.02);
-            display: flex; gap: 4px;
+            padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; gap: 6px;
         }
-        .log-time { color: #555; white-space: nowrap; font-size: 7px; min-width: 50px; }
-        .log-msg { word-break: break-all; }
-        .log-empty { text-align: center; color: #555; padding: 12px; font-size: 9px; }
+        .log-time { color: #4FC3F7; white-space: nowrap; font-size: 8px; min-width: 65px; }
+        .log-msg { word-break: break-all; color: #e0e0e0; }
+        .log-empty { text-align: center; color: #777; padding: 15px; font-size: 10px; }
         
-        .footer-text { color: #555; font-size: 7px; margin-top: 5px; text-align: center; }
+        .footer-text { color: #777; font-size: 7px; margin-top: 5px; text-align: center; }
         .toast {
             position: fixed; top: 8px; left: 50%; transform: translateX(-50%);
-            background: #333; color: white; padding: 6px 14px; border-radius: 6px;
+            background: #333; color: #ffffff; padding: 6px 14px; border-radius: 6px;
             font-size: 11px; z-index: 9999; display: none;
         }
         .toast.show { display: block; }
@@ -385,7 +355,7 @@
             </div>
             
             <div class="history-section">
-                <div class="history-title">History</div>
+                <div class="history-title">History (Last 6)</div>
                 <div class="history-list" id="historyList"><div class="history-empty">Waiting...</div></div>
             </div>
         </div>
@@ -403,11 +373,11 @@
         <div class="card">
             <button class="btn-back" onclick="showPage('dashboardPage')">Back to Dashboard</button>
             <div class="shell-box">
-                <div class="shell-header"><span>Master Shell</span><button class="btn-clear" onclick="clearLogs('master_logs')">Clear</button></div>
+                <div class="shell-header"><span>Master Shell (20 rows)</span><button class="btn-clear" onclick="clearLogs('master_logs')">Clear</button></div>
                 <div class="shell-content" id="masterContent"><div class="log-empty">Waiting...</div></div>
             </div>
             <div class="shell-box">
-                <div class="shell-header"><span>Slave Shell</span><button class="btn-clear" onclick="clearLogs('slave_logs')">Clear</button></div>
+                <div class="shell-header"><span>Slave Shell (20 rows)</span><button class="btn-clear" onclick="clearLogs('slave_logs')">Clear</button></div>
                 <div class="shell-content" id="slaveContent"><div class="log-empty">Waiting...</div></div>
             </div>
         </div>
@@ -418,9 +388,9 @@
         let motorRunning = false, motorHistory = [], timerInterval = null;
         let pendingTimerMinutes = 0, cmdId = 0;
 
-        function showPage(id) { 
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
-            document.getElementById(id).classList.add('active'); 
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
         function clearLogs(path) { window.set(window.ref(window.db, path), null); }
         
@@ -428,14 +398,12 @@
             const auth = window.auth, db = window.db;
             
             window.onAuthStateChanged(auth, function(user) {
-                if (user) { 
-                    showPage('dashboardPage'); 
-                    document.getElementById('userInfo').textContent = user.email; 
-                    setupListeners(); 
-                    loadHistory(); 
-                    loadShellLogs(); 
-                } else { 
-                    showPage('loginPage'); 
+                if (user) {
+                    showPage('dashboardPage');
+                    document.getElementById('userInfo').textContent = user.email;
+                    setupListeners(); loadHistory(); loadShellLogs();
+                } else {
+                    showPage('loginPage');
                 }
             });
             
@@ -449,24 +417,19 @@
                 btn.disabled = true; btn.textContent = 'Signing in...';
                 window.signInWithEmailAndPassword(auth, email, password)
                     .then(() => {})
-                    .catch(error => { 
-                        err.textContent = error.message; 
-                        err.classList.add('show'); 
-                        btn.disabled = false; 
-                        btn.textContent = 'Sign In'; 
+                    .catch(error => {
+                        err.textContent = error.message; err.classList.add('show');
+                        btn.disabled = false; btn.textContent = 'Sign In';
                     });
             };
             
-            window.doLogout = function() { 
-                window.signOut(auth); 
-                showPage('loginPage'); 
-            };
+            window.doLogout = function() { window.signOut(auth); showPage('loginPage'); };
             
             window.restartMaster = function() {
                 if (confirm('Restart master device?')) {
                     cmdId++;
                     window.set(window.ref(db, 'motor_control'), {
-                        command: 'restart', command_id: cmdId, 
+                        command: 'restart', command_id: cmdId,
                         timestamp: Date.now(), source: 'web_dashboard'
                     });
                     showToast('Restart command sent');
@@ -476,7 +439,7 @@
             window.checkConnection = function() {
                 cmdId++;
                 window.set(window.ref(db, 'motor_control'), {
-                    command: 'ping', command_id: cmdId, 
+                    command: 'ping', command_id: cmdId,
                     timestamp: Date.now(), source: 'web_dashboard'
                 });
                 showToast('Checking connection...');
@@ -484,9 +447,11 @@
                 window.onValue(window.ref(db, 'ping_response'), function(snap) {
                     const d = snap.val();
                     if (d) {
-                        const msg = 'Master: ' + (d.master_online ? 'Online' : 'Offline') + 
-                                   ' | Slave: ' + (d.slave_online ? 'Online' : 'Offline') + 
-                                   ' | Motor: ' + (d.motor_running ? 'ON' : 'OFF');
+                        const msg = 'Master: ' + (d.master_online ? 'Online' : 'Offline') +
+                                   ' | Slave: ' + (d.slave_online ? 'Online' : 'Offline') +
+                                   ' | Motor: ' + (d.motor_running ? 'ON' : 'OFF') +
+                                   ' | Pings: ' + (d.ping_count || 0) +
+                                   ' | Missed: ' + (d.missed_pings || 0);
                         document.getElementById('pingResult').textContent = msg;
                         document.getElementById('pingResult').className = 'ping-result ' + (d.master_online ? 'success' : 'fail');
                     }
@@ -497,14 +462,14 @@
                 cmdId++;
                 if (pendingTimerMinutes > 0) {
                     window.set(window.ref(db, 'motor_control'), {
-                        command: 'timer', command_id: cmdId, 
-                        timestamp: Date.now(), source: 'web_dashboard', 
+                        command: 'timer', command_id: cmdId,
+                        timestamp: Date.now(), source: 'web_dashboard',
                         minutes: pendingTimerMinutes
                     });
                     showToast('Starting with timer...');
                 } else {
                     window.set(window.ref(db, 'motor_control'), {
-                        command: 'on', command_id: cmdId, 
+                        command: 'on', command_id: cmdId,
                         timestamp: Date.now(), source: 'web_dashboard'
                     });
                     showToast('Starting...');
@@ -518,7 +483,7 @@
                 document.getElementById('timerCountdownRunning').classList.remove('show');
                 if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
                 window.set(window.ref(db, 'motor_control'), {
-                    command: 'off', command_id: cmdId, 
+                    command: 'off', command_id: cmdId,
                     timestamp: Date.now(), source: 'web_dashboard'
                 });
                 showToast('Stopping...');
@@ -611,51 +576,51 @@
                 else { b.className = 'alive-banner'; }
             }
             
-            function formatUptime(s) { 
-                if(s<60) return s+'s'; 
-                if(s<3600) return Math.floor(s/60)+'m'; 
-                return Math.floor(s/3600)+'h'; 
+            function formatUptime(s) {
+                if (s < 60) return s + 's';
+                if (s < 3600) return Math.floor(s/60) + 'm';
+                return Math.floor(s/3600) + 'h';
             }
             
-            function updateMasterCard(online) { 
-                document.getElementById('masterDot').className = 'dot '+(online?'green':'red'); 
-                document.getElementById('masterStatus').textContent = online?'Online':'Offline'; 
+            function updateMasterCard(online) {
+                document.getElementById('masterDot').className = 'dot ' + (online ? 'green' : 'red');
+                document.getElementById('masterStatus').textContent = online ? 'Online' : 'Offline';
             }
-            function updateLoraCard(connected) { 
-                document.getElementById('loraDot').className = 'dot '+(connected?'green':'red'); 
-                document.getElementById('loraStatus').textContent = connected?'Connected':'Off'; 
+            function updateLoraCard(connected) {
+                document.getElementById('loraDot').className = 'dot ' + (connected ? 'green' : 'red');
+                document.getElementById('loraStatus').textContent = connected ? 'Connected' : 'Off';
             }
-            function updateSlaveCard(online) { 
-                document.getElementById('slaveDot').className = 'dot '+(online?'green':'red'); 
-                document.getElementById('slaveStatus').textContent = online?'Online':'Offline'; 
+            function updateSlaveCard(online) {
+                document.getElementById('slaveDot').className = 'dot ' + (online ? 'green' : 'red');
+                document.getElementById('slaveStatus').textContent = online ? 'Online' : 'Offline';
             }
             function updateMotorBox(running, source) {
                 const box = document.getElementById('motorBox');
                 const btn = document.getElementById('startBtn');
                 motorRunning = running;
-                if (running) { 
-                    box.className = 'motor-box running'; 
-                    document.getElementById('motorIcon').textContent = 'RUNNING'; 
-                    document.getElementById('motorState').textContent = 'ON'; 
-                    document.getElementById('motorSource').textContent = 'By: '+getSrc(source); 
-                    document.getElementById('motorRelay').textContent = 'Relay 1 (NO)'; 
-                    if(btn) btn.disabled = true; 
-                } else { 
-                    box.className = 'motor-box'; 
-                    document.getElementById('motorIcon').textContent = 'MOTOR'; 
-                    document.getElementById('motorState').textContent = 'STOPPED'; 
-                    document.getElementById('motorSource').textContent = source?'By: '+getSrc(source):''; 
-                    document.getElementById('motorRelay').textContent = 'Relay 2 (NC)'; 
-                    if(btn) btn.disabled = false; 
+                if (running) {
+                    box.className = 'motor-box running';
+                    document.getElementById('motorIcon').textContent = 'RUNNING';
+                    document.getElementById('motorState').textContent = 'ON';
+                    document.getElementById('motorSource').textContent = 'By: ' + getSrc(source);
+                    document.getElementById('motorRelay').textContent = 'Relay 1 (NO)';
+                    if (btn) btn.disabled = true;
+                } else {
+                    box.className = 'motor-box';
+                    document.getElementById('motorIcon').textContent = 'MOTOR';
+                    document.getElementById('motorState').textContent = 'STOPPED';
+                    document.getElementById('motorSource').textContent = source ? 'By: ' + getSrc(source) : '';
+                    document.getElementById('motorRelay').textContent = 'Relay 2 (NC)';
+                    if (btn) btn.disabled = false;
                 }
             }
             
             function loadHistory() {
-                window.onValue(window.query(window.ref(db, 'motor_history'), window.limitToLast(5)), function(snap) {
+                window.onValue(window.query(window.ref(db, 'motor_history'), window.limitToLast(6)), function(snap) {
                     const d = snap.val();
-                    if (d) { 
-                        motorHistory = Object.values(d).sort((a,b) => b.timestamp - a.timestamp).slice(0,5); 
-                        renderHistory(); 
+                    if (d) {
+                        motorHistory = Object.values(d).sort((a,b) => b.timestamp - a.timestamp).slice(0, 6);
+                        renderHistory();
                     }
                 });
             }
@@ -666,24 +631,24 @@
                 let h = '';
                 motorHistory.forEach(e => {
                     const isOn = e.action === 'on';
-                    h += '<div class="history-item '+(e.source==='push_button'?'push-button':e.source==='web_dashboard'?'web-dashboard':'')+'">'+
-                        '<div class="history-icon">'+(isOn?'ON':'OFF')+'</div>'+
-                        '<div class="history-details">'+
-                        '<div class="history-action '+(isOn?'on':'off')+'">'+(isOn?'MOTOR ON':'MOTOR OFF')+'</div>'+
-                        '<span class="source-badge '+(e.source==='push_button'?'push':e.source==='web_dashboard'?'web':'timer')+'">'+getSrc(e.source)+'</span>'+
-                        '</div>'+
-                        '<div class="history-time">'+formatTime(e.timestamp)+'</div>'+
+                    h += '<div class="history-item ' + (e.source === 'push_button' ? 'push-button' : e.source === 'web_dashboard' ? 'web-dashboard' : '') + '">' +
+                        '<div class="history-icon">' + (isOn ? 'ON' : 'OFF') + '</div>' +
+                        '<div class="history-details">' +
+                        '<div class="history-action ' + (isOn ? 'on' : 'off') + '">' + (isOn ? 'MOTOR ON' : 'MOTOR OFF') + '</div>' +
+                        '<span class="source-badge ' + (e.source === 'push_button' ? 'push' : e.source === 'web_dashboard' ? 'web' : 'timer') + '">' + getSrc(e.source) + '</span>' +
+                        '</div>' +
+                        '<div class="history-time">' + formatTime(e.timestamp) + '</div>' +
                         '</div>';
                 });
                 list.innerHTML = h;
             }
             
             function loadShellLogs() {
-                window.onValue(window.query(window.ref(db, 'master_logs'), window.limitToLast(30)), function(snap) {
+                window.onValue(window.query(window.ref(db, 'master_logs'), window.limitToLast(20)), function(snap) {
                     const d = snap.val();
                     document.getElementById('masterContent').innerHTML = d ? renderLogs(Object.values(d).sort((a,b) => b.time - a.time)) : '<div class="log-empty">No logs</div>';
                 });
-                window.onValue(window.query(window.ref(db, 'slave_logs'), window.limitToLast(30)), function(snap) {
+                window.onValue(window.query(window.ref(db, 'slave_logs'), window.limitToLast(20)), function(snap) {
                     const d = snap.val();
                     document.getElementById('slaveContent').innerHTML = d ? renderLogs(Object.values(d).sort((a,b) => b.time - a.time)) : '<div class="log-empty">No logs</div>';
                 });
@@ -693,7 +658,7 @@
                 let h = '';
                 logs.forEach(l => {
                     const t = formatLogTime(l.time || l.timestamp);
-                    h += '<div class="log-line"><span class="log-time">'+t+'</span><span class="log-msg">'+(l.msg || l.message || '')+'</span></div>';
+                    h += '<div class="log-line"><span class="log-time">' + t + '</span><span class="log-msg">' + (l.msg || l.message || '') + '</span></div>';
                 });
                 return h || '<div class="log-empty">No logs</div>';
             }
@@ -722,8 +687,8 @@
                 const n = new Date(), df = n - d;
                 const ds = d.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric', timeZone:'Asia/Kolkata'});
                 const ts2 = d.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'Asia/Kolkata'});
-                if (df < 60000) return 'Now';
-                if (df < 3600000) return Math.floor(df/60000)+'m';
+                if (df < 60000) return 'Just now';
+                if (df < 3600000) return Math.floor(df/60000) + 'm ago';
                 if (df < 86400000) return ts2;
                 return ds + ' ' + ts2;
             }
@@ -731,13 +696,8 @@
         
         function showToast(m) {
             const t = document.getElementById('toast');
-            if (t) {
-                t.textContent = m;
-                t.classList.add('show');
-                setTimeout(() => t.classList.remove('show'), 2000);
-            }
+            if (t) { t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
         }
-        
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && document.getElementById('loginPage').classList.contains('active')) doLogin();
         });
