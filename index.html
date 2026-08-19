@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0a0a1a">
     <title>BP Motor Panel</title>
 
-    <!-- Firebase Compat SDKs (easier for auth & database) -->
+    <!-- Firebase Compat SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -279,7 +279,6 @@
 </div>
 
 <script>
-    // Your Firebase configuration
     const firebaseConfig = {
         apiKey: "AIzaSyAdU0803CwzkKBIC9VTFBT6X29xhOeUi3g",
         authDomain: "bp-motor-panel.firebaseapp.com",
@@ -304,7 +303,7 @@
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
-    function clearLogs(path) { firebase.database().ref(path).remove(); }
+    function clearLogs(path) { db.ref(path).remove(); }
     function showToast(m) {
         const t = document.getElementById('toast');
         t.textContent = m;
@@ -312,23 +311,22 @@
         setTimeout(() => t.classList.remove('show'), 2000);
     }
 
-    // Unified timestamp formatter
+    // UPDATED TIMESTAMP FORMAT: day + month + time only
     function formatTimestamp(ts) {
         if (!ts) return '--';
         if (ts < 1e12) ts *= 1000;
         const d = new Date(ts);
         if (isNaN(d.getTime())) return '--';
-        const now = new Date();
-        const diff = now - d;
-        const timeStr = d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'Asia/Kolkata' });
-        const dateStr = d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric', timeZone:'Asia/Kolkata' });
-        if (diff < 60000) return 'Just now';
-        if (diff < 3600000) return Math.floor(diff/60000)+'m ago';
-        if (diff < 86400000) return timeStr;
-        return dateStr+' '+timeStr;
+        return d.toLocaleString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'Asia/Kolkata'
+        });
     }
 
-    // Auth state
     auth.onAuthStateChanged(user => {
         if (user) {
             showPage('dashboardPage');
